@@ -1,0 +1,25 @@
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }}</title>
+        {% else %}
+        <title>Система голосового оповещения</title>
+        {% endif %}
+
+    </head>
+    <body>
+        <div>СГО: <a href="/index">Главная</a></div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{message}}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        
+        {% block content %} {% endblock %}
+    </body>
+</html>
