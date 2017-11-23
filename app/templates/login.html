@@ -1,17 +1,30 @@
-{% extends "base.html" %}
+<head>
+        {% if title %}
+        <title>{{ title }}</title>
+        {% else %}
+        <title>Система голосового оповещения</title>
+        {% endif %}
 
-{% block content %}
+    </head>
+
 <h1>Вход</h1>
 <form action="" method="post" name="login">
     {{form.hidden_tag()}}
     <p>
-        Введите ваш OpenID:<br>
-        {{form.openid(size=80)}}<br>
-        {% for error in form.errors.openid %}
+        Логин:<br>
+        {{form.login(size=80)}}<br>
+        {% for error in form.errors.login %}
         <span style="color: red;">[{{error}}]</span>
         {% endfor %}
     </p>
-    <p>{{form.remember_me}} Запомнить меня</p>
+
+    <p>
+        Пароль:<br>
+        {{form.password(size=80)}}<br>
+        {% for error in form.errors.password %}
+        <span style="color: red;">[{{error}}]</span>
+        {% endfor %}
+    </p>
     <p><input type="submit" value="Вход"</p>
 </form>
-{% endblock %}
+

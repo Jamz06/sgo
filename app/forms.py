@@ -1,8 +1,15 @@
 from flask.ext.wtf import Form
-from wtforms import TextField, BooleanField
-from wtforms.validators import Required
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired
 
 class LoginForm(Form):
-    openid = TextField('openid', validators = [Required()])
-    remember_me = BooleanField('remember_me', default = False)
+    login = StringField('login', validators = [DataRequired()])
+    password = PasswordField('password', validators = [DataRequired()])
+
+class AdminForm(Form):
+    login = StringField('login')
+    password = PasswordField('password')
+    organization = StringField('organization')
+    role = StringField('role')
+
 
