@@ -4,7 +4,7 @@ from flask.ext.bcrypt import generate_password_hash, check_password_hash
 from flask.ext.login import LoginManager
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 # Подключить конфиг
 app.config.from_object('config')
 # Подключить БД

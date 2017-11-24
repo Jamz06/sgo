@@ -52,11 +52,13 @@ class Numbers(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     # user = db.Column(db.Integer, index = True)
     user = db.Column(db.Integer, db.ForeignKey('users.id'))
-    number = db.Column(db.Integer, index = True)
+    number = db.Column(db.String(11), index = True)
+    comment = db.Column(db.String(90), index = True)
 
-    def __init__(self, user, number):
+    def __init__(self, user, number, comment):
         self.user = user
         self.number = number
+        self.comment = comment
 
 class Lists(db.Model):
     '''

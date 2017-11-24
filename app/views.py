@@ -1,10 +1,12 @@
-from flask import render_template, flash, redirect, url_for, session, request, g
+from flask import render_template, flash, redirect, url_for, session, request, g, send_from_directory
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
 from .forms import LoginForm, AdminForm, CreateForm
-from .models import Users, Alarms, Lists
+from .models import Users, Alarms, Lists, Numbers
 from sqlalchemy import or_
 
+from flask_json import FlaskJSON, JsonError, json_response, as_json
+FlaskJSON(app)
 
 @app.route('/')
 @app.route('/index', methods=['GET'])
@@ -90,6 +92,14 @@ def load_user(id):
     return Users.query.get(int(id))
 
 
+@app.route('/numbers', methods=['POST', 'GET'])
+@login_required
+def numbers():
+    user = g.user
+
+    return render_template('numbers.html')
+
+
 @app.route('/admin', methods= ['GET', 'POST'])
 @login_required
 def admin():
@@ -108,3 +118,46 @@ def admin():
     return render_template('admin.html',
                            form = form
                            )
+
+@app.route('/static/<path:path>')
+@login_required
+def send_js(path):
+    # Отладочный вывод с информацией о запросе файла
+    # flash("path is: " + path)
+    return send_from_directory('static', path)
+
+
+@app.route('/numbers_batch', methods=['POST', 'GET'])
+# @login_required
+def numbers_batch():
+    '''
+        Принять JSON от таблицы
+    :return: Ответить хз чем пока
+    '''
+    user = g.user
+
+    data = request.get_json(force=True)
+
+    print(dict.keys(data))
+    # print(data['addList'])
+    if data['addList']:
+        print(len(data['addList'][0]))
+        print(data['addList'][0]['ik_num'])
+        data_line = data['addList'][0]
+        number = Numbers(user.id, data_line['ik_num'], data_line['comment'])
+        db.session.add(number)
+        db.session.commit()
+
+    if data['updateList']:
+        print("update len: " + len(data['updateList']))
+    else:
+        print("Update is empty")
+
+
+    if data['deleteList']:
+        pass
+
+
+    return  json_response(200)
+
+
