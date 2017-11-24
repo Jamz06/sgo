@@ -24,7 +24,19 @@ class Users(db.Model):
         self.password =password
         self.organization = organization
         self.role = role
-        
+
+    def __repr__(self):
+        return '<User %r>' % (self.login)
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def get_id(self):
+
+        return str(self.id)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
@@ -42,21 +54,21 @@ class Numbers(db.Model):
     user = db.Column(db.Integer, db.ForeignKey('users.id'))
     number = db.Column(db.Integer, index = True)
 
+    def __init__(self, user, number):
+        self.user = user
+        self.number = number
 
 class Lists(db.Model):
     '''
         Описание таблицы списков
     '''
     id = db.Column(db.Integer, primary_key = True)
+    user = db.Column(db.Integer, db.ForeignKey('users.id'))
     name = db.Column(db.String(45), index = True)
 
-class Included_numbers(db.Model):
-    '''
-        Описание таблицы отношения номеров к спискам
-    '''
-    id = db.Column(db.Integer, primary_key = True)
-    lists = db.Column(db.String(45), index = True)
-    number = db.Column(db.Integer, index = True)
+    def __init__(self, name, user):
+        self.name = name
+        self.user = user
 
 class Alarms(db.Model):
     '''
@@ -64,14 +76,33 @@ class Alarms(db.Model):
     '''
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(45), index = True)
+    user = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __init__(self, name, user):
+        self.name = name
+        self.user = user
+
+class Included_numbers(db.Model):
+    '''
+        Описание таблицы отношения номеров к спискам
+    '''
+    id = db.Column(db.Integer, primary_key = True)
+    list = db.Column(db.String(45), db.ForeignKey('lists.id'))
+    number = db.Column(db.Integer, db.ForeignKey('numbers.id'))
+
+    def __init__(self, list, number):
+        self.list = list
+        self.number = number
 
 class Included_alarms(db.Model):
     '''
         Описание таблицы отношения номеров к спискам
     '''
     id = db.Column(db.Integer, primary_key = True)
-    lists = db.Column(db.String(45), index = True)
-    alarm = db.Column(db.Integer, index = True)
+    list = db.Column(db.String(45), db.ForeignKey('lists.id'))
+    alarm = db.Column(db.Integer, db.ForeignKey('alarms.id'))
 
-    def __repr__(self):
-        return '<User %r' % (self.login)
+    def __init__(self, list, alarm):
+        self.list = list
+        self.alarm = alarm
+
