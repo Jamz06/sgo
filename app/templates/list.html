@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
+<script type="text/javascript" src="/static/js/list.js"></script>
+
+<h2>Список: {{list_name}}</h2>
+
+<input id="list_id" value="{{list_id}}" style="visibility: hidden">
+
+<form method="POST" action="">
+
+        <h2>Выберите номера</h2>
+        <br>
+        <table cellspacing="0", cellpadding="8" border="0">
+            <tbody>
+            <tr>
+                <td>
+                    Доступные
+                    <br>
+                    <select id="left_list" name="available_numbers" multiple="multiple" size="10" style="height: 200px; width: 200px;"
+                            ondblclick="list_move('right');">
+                        {% for number in numbers %}
+                            <option value="{{number.id}}">{{number.number}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td align="left">
+                    <a href="#" onclick="list_move('right'); //return false;">=></a>
+                    <a href="#" onclick="list_move('left'); //return false;"><=</a>
+                    <br>
+                    <a href="#" onclick="List_move_around('right','true'); return false;">=>></a>
+                    <a href="#" onclick="List_move_around('left','true'); return false;"><<=</a>
+                </td>
+                <td>
+                    Выбранные
+                    <br>
+                    <select id="right_list" size="10" name="list_numbers[]" multiple="multiple" style="height: 200px; width: 200px;"
+                            ondblclick="list_move('left');">
+                        {% for list_num in user_list %}
+
+                            <option value="{{list.num}}">{{list_num.number}}</option>
+                        {% endfor %}
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <!--<input type="submit" value="Сохранить" onclick="save();">-->
+                    <a href="##" onclick="save();">Сохранить</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+
+
+</form>
+
+{% endblock %}}

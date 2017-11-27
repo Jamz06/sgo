@@ -72,6 +72,10 @@ class Lists(db.Model):
         self.name = name
         self.user = user
 
+    def __repr__(self):
+
+        return self.name
+
 class Alarms(db.Model):
     '''
         Описание таблицы тревог

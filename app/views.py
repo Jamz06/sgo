@@ -1,12 +1,35 @@
-from flask import render_template, flash, redirect, url_for, session, request, g, send_from_directory
+from flask import render_template, flash, redirect, url_for, session, request, g, send_from_directory, jsonify
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
 from .forms import LoginForm, AdminForm, CreateForm
-from .models import Users, Alarms, Lists, Numbers
-from sqlalchemy import or_
+from .models import Users, Alarms, Lists, Numbers, Included_numbers
+from sqlalchemy import or_, update, delete
 
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 FlaskJSON(app)
+
+def get_numbers_data(user_id):
+    '''
+    Функция загрузки номеров пользователя
+    :param user_id:  ИД пользователя
+    :return: массив с номерами пользователя
+    '''
+    numbers = Numbers.query.filter_by(user=user_id)
+
+    # print(json_numbers[0])
+    json_numbers = []
+    for number in numbers:
+        print(number.number)
+        json_numbers.append(
+            {
+                'id': number.id,
+                'number': number.number,
+                'comment': number.comment
+            }
+        )
+    return json_numbers
+
+
 
 @app.route('/')
 @app.route('/index', methods=['GET'])
@@ -127,8 +150,8 @@ def send_js(path):
     return send_from_directory('static', path)
 
 
-@app.route('/numbers_batch', methods=['POST', 'GET'])
-# @login_required
+@app.route('/numbers_batch', methods=['POST'])
+@login_required
 def numbers_batch():
     '''
         Принять JSON от таблицы
@@ -142,22 +165,91 @@ def numbers_batch():
     # print(data['addList'])
     if data['addList']:
         print(len(data['addList'][0]))
-        print(data['addList'][0]['ik_num'])
+        print(data['addList'][0]['number'])
         data_line = data['addList'][0]
-        number = Numbers(user.id, data_line['ik_num'], data_line['comment'])
+        number = Numbers(user.id, data_line['number'], data_line['comment'])
         db.session.add(number)
         db.session.commit()
+        return jsonify(get_numbers_data(user.id))
 
     if data['updateList']:
-        print("update len: " + len(data['updateList']))
+        print(len(data['updateList']))
+        data_line = data['updateList'][0]
+        db.session.query(Numbers).filter_by(id=data_line['id']).update({
+            'number': data_line['number'],
+            'comment': data_line['comment']
+        })
+        db.session.commit()
+        # Numbers.query.filter_by(id=data_line['id']).update({'number': data_line['number']})
+        return jsonify(get_numbers_data(user.id))
     else:
         print("Update is empty")
 
 
     if data['deleteList']:
-        pass
+        data_line = data['deleteList'][0]
+        #number = Numbers.query.filter_by(id=data_line['id'])
+        db.session.query(Numbers).filter_by(id=data_line['id']).delete()
+        #db.session.delete(number)
+        db.session.commit()
+        return jsonify(get_numbers_data(user.id))
 
 
     return  json_response(200)
+
+
+@app.route('/numbers_data', methods=['GET'])
+@login_required
+def numbers_data():
+    '''
+    Функция-маршрут для отдачи номеров пользователя.
+    :return: JSON с номерами пользователя
+    '''
+
+    user = g.user
+    json_numbers = get_numbers_data(user.id)
+
+    return jsonify(data=json_numbers)
+
+@app.route('/modify_list/<list_id>', methods=['POST', 'GET'])
+@login_required
+def modify_list(list_id):
+    user = g.user
+
+    if request.method == 'POST':
+        data = request.get_json(force=True)
+
+        # дропаем все номера в списке
+        db.session.query(Included_numbers).filter_by(list=list_id).delete()
+        db.session.commit()
+        # Занести обновленный список в БД
+        for elem in data['list']:
+            print(elem)
+            inc_num = Included_numbers(list_id, elem)
+            db.session.add(inc_num)
+            db.session.commit()
+
+        flash("Список сохранен")
+        # Надо будет сделать проверку. Если что не так, вернуть другой ответ.
+        return json_response(200)
+    else:
+        # Получить список всех номеров.
+        numbers = Numbers.query.filter_by(user=user.id)
+
+        # Получить название списка по ID
+        lists = Lists.query.filter_by(id=list_id).first()
+        # По ID списка, получить ID номеров.
+        user_list = []
+        # По ID номеров, получить номера в списке.
+
+        return (render_template('list.html',
+                                list_name=lists.name,
+                                numbers=numbers,
+                                user_list=user_list,
+                                list_id=list_id
+
+                                )
+                )
+
 
 

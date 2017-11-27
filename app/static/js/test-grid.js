@@ -1,27 +1,45 @@
-function onGridEdit(myRowID) {
-    $("#" + myRowID + "_Date").datepicker({ dateFormat: 'dd/mm/yy' })
-
-    // this will set focus on the Invested column so the datepicker doesn't fire
-    $("#" + myRowID + "_Invested").get(0).focus();
-}
-
-function pqDatePicker(ui) {
-    var $this = $(this);
-    $this
-        .css({ zIndex: 3, position: "relative" })
-        .datepicker({
-           // yearRange: "-20:+0", //20 years prior to present.
-            changeYear: true,
-            changeMonth: true,
-            //showButtonPanel: true,
-            onClose: function (evt, ui) {
-                $(this).focus();
+ function acceptChanges() {
+            //attempt to save editing cell.
+            //debugger;
+            if (grid.saveEditCell() === false) {
+                return false;
             }
-        });
-    //default From date
-    //   $this.filter(".pq-from").datepicker("option", "defaultDate", new Date("01/01/1996"));
-    //default To date
-   // $this.filter(".pq-to").datepicker("option", "defaultDate", new Date("12/31/1998"));
+
+            var isDirty = grid.isDirty();
+            if (isDirty) {
+                //validate the new added rows.
+                var addList = grid.getChanges().addList;
+                for (var i = 0; i < addList.length; i++) {
+                    var rowData = addList[i];
+                    var isValid = grid.isValid({ "rowData": rowData }).valid;
+                    if (!isValid) {
+                        return;
+                    }
+                }
+                var changes = grid.getChanges({ format: "byVal" });
+
+                //post changes to server
+                $.ajax({
+                    dataType: "json",
+                    type: "POST",
+                    async: true,
+                    beforeSend: function (jqXHR, settings) {
+                        grid.showLoading();
+                    },
+                    url: "/numbers_batch", //for ASP.NET, java
+                    data: { list: JSON.stringify(changes) },
+                    success: function (changes) {
+                        //debugger;
+                        grid.commit({ type: 'add', rows: changes.addList });
+                        grid.commit({ type: 'update', rows: changes.updateList });
+                        grid.commit({ type: 'delete', rows: changes.deleteList });
+
+                    },
+                    complete: function () {
+                        grid.hideLoading();
+                    }
+                });
+            }
 }
 
 $(document).ready(function(){
@@ -37,7 +55,7 @@ $(document).ready(function(){
                     { type: 'button', icon: 'ui-icon-plus', label: 'Новый номер', listener:
                         { "click": function (evt, ui) {
                             //append empty row at the end.                            
-                            var rowData = { ik_num: '8XXXXXXXXXX', comment: '' }; //empty row
+                            var rowData = { number: '', comment: '' }; //empty row
                             var rowIndx = $grid.pqGrid("addRow", { rowData: rowData });
                             $grid.pqGrid("goToPage", { rowIndx: rowIndx });
                             $grid.pqGrid("setSelection", null);
@@ -140,6 +158,7 @@ $(document).ready(function(){
 
                         dataType: "json",
                         type: "POST",
+                        recIndx: 'id',
                         async: true,
                         beforeSend: function (jqXHR, settings) {
                             $(".saving", $grid).show();
@@ -168,11 +187,11 @@ $(document).ready(function(){
                 $("button:contains('Redo')", $grid).button("option", { label: 'Redo (' + ui.num_redo + ')' });
             },
             colModel: [
-                { title: "Номер", dataType: "string", dataIndx: "ik_num", editable: true, width: 100,
+                { title: "Номер", dataType: "string", dataIndx: "number", editable: true, width: 100,
                     validations: [
                         //{ type: 'minLen', value: 1, msg: "Обязательное поле." },
                          //{ type: 'maxLen', value: 11, msg: "Длинна должна быть = 11" },
-                        { type: 'regexp', value: '^8[0-9]{10}', msg: 'Номер должен начинаться на 8 и содержать 11 символов'},
+                        { type: 'regexp', value: '^8[0-9]{10}$', msg: 'Номер должен начинаться на 8 и содержать 11 символов'},
                     ]
                 },
 
@@ -198,8 +217,7 @@ $(document).ready(function(){
             dataModel: {
                 dataType: "JSON",
                 location: "remote",
-                recIndx: "number_id",
-                
+                recIndx: 'id',
                 url: "/numbers_data",
                 getData: function (response) {
                     return { data: response.data };
