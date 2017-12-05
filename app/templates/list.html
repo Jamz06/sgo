@@ -3,58 +3,85 @@
 <script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
 <script type="text/javascript" src="/static/js/list.js"></script>
 
-<h2>Список: {{list_name}}</h2>
+
+
 
 <input id="list_id" value="{{list_id}}" style="visibility: hidden">
 
-<form method="POST" action="">
+<div class="index">
+    <form method="POST" action="">
 
-        <h2>Выберите номера</h2>
-        <br>
-        <table cellspacing="0", cellpadding="8" border="0">
-            <tbody>
-            <tr>
-                <td>
-                    Доступные
-                    <br>
-                    <select id="left_list" name="available_numbers" multiple="multiple" size="10" style="height: 200px; width: 200px;"
-                            ondblclick="list_move('right');">
-                        {% for number in numbers %}
-                            <option value="{{number.id}}">{{number.number}}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-                <td align="left">
-                    <a href="#" onclick="list_move('right'); //return false;">=></a>
-                    <a href="#" onclick="list_move('left'); //return false;"><=</a>
-                    <br>
-                    <a href="#" onclick="List_move_around('right','true'); return false;">=>></a>
-                    <a href="#" onclick="List_move_around('left','true'); return false;"><<=</a>
-                </td>
-                <td>
-                    Выбранные
-                    <br>
-                    <select id="right_list" size="10" name="list_numbers[]" multiple="multiple" style="height: 200px; width: 200px;"
-                            ondblclick="list_move('left');">
-                        {% for list_num in user_list %}
+            <h1>Список: {{list_name}}</h1>
 
-                            <option value="{{list.num}}">{{list_num.number}}</option>
-                        {% endfor %}
+            <table cellspacing="0", cellpadding="8" border="0" width="100%">
+                <tbody>
+                <tr>
+                    <td>
+                        <label class="marker" for="left_list">
+                            Доступные номера
+                        </label>
 
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <!--<input type="submit" value="Сохранить" onclick="save();">-->
-                    <a href="##" onclick="save();">Сохранить</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                        <br>
+                        <select id="left_list" name="available_numbers" multiple="multiple" size="20" style="height: 400px; width: 250px;"
+                                ondblclick="list_move('right');">
+                            {% for number in numbers %}
+                                <option value="{{number.id}}">{{number.number}} | {{number.comment}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td align="left">
+                        <!--
+                        <a href="#" class="list" onclick="list_move('right'); //return false;">=></a>
+                        <a href="#" class="list" onclick="list_move('left'); //return false;"><=</a>
+                        <br>
+                        <a href="#" class="list" onclick="List_move_around('right','true'); return false;">=>></a>
+                        <a href="#" class="list" onclick="List_move_around('left','true'); return false;"><<=</a>
+                        -->
+                        <button class="btn-grey" type="button" onclick="list_move('right');">
+                            <span class="arrow right"></span>
+                        </button>
+                        <br>
+                        <button class="btn-grey" type="button" onclick="list_move('left');">
+                            <span class="arrow left"></span>
+                        </button>
+                        <br>
+                        <!--
+                        <button class="btn-grey" type="button" onclick="List_move_around('right','true'); return false;">
+                            <span class="arrow right"></span><span class="arrow right"></span>
+                        </button>
+                        <br>
+                        <button class="btn-grey" type="button" onclick="List_move_around('left','true'); return false;">
+                            <span class="arrow left"></span><span class="arrow left"></span>
+                        </button>
+                        -->
+                    </td>
+                    <td>
+                        <label class="marker" for="right_list">
+                        Выбранные
+                        </label>
+                        <br>
+                        <select id="right_list" size="20" name="list_numbers[]" multiple="multiple" style="height: 400px; width: 250px;"
+                                ondblclick="list_move('left');">
+                            {% for list in user_list %}
+
+                                <option value="{{list[0]}}">{{list[1]}}  |  {{list[2]}}</option>
+                            {% endfor %}
+
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <!--<input type="submit" value="Сохранить" onclick="save();">-->
+                        <!--<a href="##" class="" onclick="save();">Сохранить</a>-->
+                        <input type="button" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Сохранить" onclick="save();"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
 
 
-</form>
-
+    </form>
+</div>
 {% endblock %}}

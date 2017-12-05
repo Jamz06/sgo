@@ -1,23 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Create user</h1>
-<form action="" method="post" name="login">
-    {{form.hidden_tag()}}
-    <p>
-        Логин:<br>
-        {{form.login(size=80)}}<br>
-    </p>
-    <p>
-    Пароль:<br>
-        {{form.password(size=80)}}<br>
-    </p>
-    Название Учреждения:<br>
-        {{form.organization(size=80)}}<br>
-    </p>
-    Роль:<br>
-        {{form.role(size=80)}}<br>
-    </p>
-     <p><input type="submit" value="Добавить"</p>
+<table>
+    <tr>
+        <td>
+            <form action="" method="post" name="login">
+                {{form.hidden_tag()}}
 
-</form>
+                    Логин:<br>
+                    {{form.login(size=80)}}<br>
+
+                Пароль:<br>
+                    {{form.password(size=80)}}<br>
+
+                Название Учреждения:<br>
+                    {{form.organization(size=80)}}<br>
+
+                Роль:<br>
+                    {{form.role(size=80)}}<br>
+
+                 <input type="submit" class="btn btn-primary btn-block btn-large" value="Добавить"/>
+
+            </form>
+        </td>
+        <td>
+            <form>
+
+            </form>
+        </td>
+</table>
 {% endblock %}

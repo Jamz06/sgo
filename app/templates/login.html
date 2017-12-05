@@ -1,30 +1,38 @@
-<head>
-        {% if title %}
-        <title>{{ title }}</title>
-        {% else %}
-        <title>Система голосового оповещения</title>
-        {% endif %}
+<!DOCTYPE html>
+<html>
+    <head>
+            {% if title %}
+            <title>{{ title }}</title>
+            {% else %}
+            <title>Система голосового оповещения</title>
+            {% endif %}
+              <link rel="stylesheet" type="text/css" href="/static/web.css">
 
+              <link rel="stylesheet" href="/static/web.css">
     </head>
+    <body>
+        <div class="login" >
+            <h1>Вход</h1>
+            <form action="" class="login" method="post" name="login">
+                {{form.hidden_tag()}}
 
-<h1>Вход</h1>
-<form action="" method="post" name="login">
-    {{form.hidden_tag()}}
-    <p>
-        Логин:<br>
-        {{form.login(size=80)}}<br>
-        {% for error in form.errors.login %}
-        <span style="color: red;">[{{error}}]</span>
-        {% endfor %}
-    </p>
+                    <!--Логин:<br>-->
+                    {{form.login(size=80)}}<br>
+                    {% for error in form.errors.login %}
+                    <span style="color: red;">[{{error}}]</span>
+                    {% endfor %}
 
-    <p>
-        Пароль:<br>
-        {{form.password(size=80)}}<br>
-        {% for error in form.errors.password %}
-        <span style="color: red;">[{{error}}]</span>
-        {% endfor %}
-    </p>
-    <p><input type="submit" value="Вход"</p>
-</form>
 
+
+                    <!--Пароль:<br>-->
+                    {{form.password(size=80)}}<br>
+                    {% for error in form.errors.password %}
+                    <span style="color: red;">[{{error}}]</span>
+                    {% endfor %}
+                
+                <input type="submit" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Вход">
+            </form>
+
+        </div>
+    </body>
+</html>

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -6,24 +7,40 @@
         {% else %}
         <title>Система голосового оповещения</title>
         {% endif %}
-        <link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.theme.css" />
+        <link rel="shortcut icon" href="/static/k.ico"/>
+        <link rel="stylesheet" href="/static/web.css">
+        <!--<link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.theme.css" />-->
+        <link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.custom.css" />
         <link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.structure.css" />
         <link rel="stylesheet" href="/static/js/grid-2.2.0/pqgrid.min.css" />
+
     </head>
     <body>
-        <div align="center">
-            Система оповещения личного состава<br>
-            <a href="{{ url_for('index') }}">Главная</a>
-            {% if g.user.is_authenticated() %}
-                | <a href="{{ url_for('logout') }}">Выход</a>
-            {% endif %}
-            | <a href="{{ url_for('numbers') }}">Номера</a>
-            {% if g.user.role == 1 %}
-                | <a href="{{ url_for('admin') }}">Админка</a>
-            {% endif %}
+    <p class="bottom">Система оповещения личного состава</p>
+        <!--<div align="center">-->
+            <nav>
 
-        </div>
-        <hr>
+                <a href="{{ url_for('index') }}">Главная</a>
+
+                <a href="{{ url_for('numbers') }}">Номера</a>
+
+                <a href="/create/list" >Создать список</a>
+
+                <a href="/create/alarm" >Создать тревогу</a>
+
+                {% if g.user.role == 1 %}
+                    <a href="{{ url_for('admin') }}">Админка</a>
+                {% else %}
+                    <a href="/help">Помощь</a>
+                {% endif %}
+
+                {% if g.user.is_authenticated() %}
+                    <a href="{{ url_for('logout') }}">Выход</a>
+                {% endif %}
+                <div class="animation start-home"></div>
+            </nav>
+        <!--</div>-->
+        <!--<hr>-->
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul style="color: #3A7734">
@@ -33,7 +50,13 @@
         </ul>
         {% endif %}
         {% endwith %}
-        
+        <h1 align="center">
+            {% if user.organization %}
+                {{user.organization}}
+            {% else %}
+            Тестовый вход
+            {% endif %}
+        </h1>
         {% block content %} {% endblock %}
     </body>
 </html>

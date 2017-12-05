@@ -1,56 +1,73 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 align="center">
-    {% if user.organization %}
-        {{user.organization}}
-    {% else %}
-    Тестовый вход
-    {% endif %}
-</h1>
-
-<hr>
-<table  style="width: 100%; height: 100%; table-layout: fixed">
-    <tbody style="vertical-align: top;">
-        <tr>
-            <td valign="top">
-
-                <p style="text-align: center">Типы тревог</p>
-                <form>
-
-                        {% for alarm in alarms %}
-                        <input type="radio" name="alarm_type" value="{{ alarm.id }}">{{ alarm.name}}</input><br>
-                        {% endfor %}
 
 
 
-                </form>
+<script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
+<script type="text/javascript" src="/static/js/send_alert.js"></script>
 
-            </td>
+<div class="index">
 
-            <td valign="top">
-                <p style="text-align: center">Списки</p> <br>
-                <a href="/create/list" >Создать список</a>
-                <form>
-                    {% for list in lists %}
-                        <input type="checkbox" name="list" value="{{ list.id }}">{{ list.name}}</input>  <a href="/modify_list/{{list.id}}">Редактировать список</a> <br>
-                    {% endfor %}
-                </form>
-
-            </td>
-        </tr>
-
-        <tr>
-            <td valign="top">
+        <table   class="index-table" cellspacing="50">
+            <tbody >
+                <tr>
+                    <td align="left" valign="top">
 
 
-            </td>
 
-            <td valign="top">
+                            <form id="alert_form" >
+                                <div class="checkboxes-and-radios">
+                                    {% for alarm in alarms %}
 
-            </td>
-        </tr>
-    </tbody>
-</table>
+                                        <input  type="radio" id="alarm-{{alarm.id}}" name="alarm_type" value="{{ alarm.id }}">
+                                        <label for="alarm-{{alarm.id}}">{{ alarm.name }}</label>
+                                    {% endfor %}
+                                </div>
 
+                            </form>
+
+
+                    </td>
+
+                    <td  valign="top">
+                        <!--<p >Списки</p> <br>-->
+
+                        <form id="list_form">
+                             <div class="checkboxes-and-radios">
+                                {% for list in lists %}
+
+                                    <input type="checkbox" id="list-{{list.id}}" name="list" value="{{ list.id }}">
+                                    <label
+                                            for="list-{{list.id}}">
+                                        <a class="list" href="/list/modify/{{list.id}}">{{ list.name }}</a>
+                                            <!--<a href="/list/modify/{{list.id}}">&#128736;</a>
+                                        /
+                                            <a href="/list/delete/{{list.id}}">	&#128465;</a>-->
+
+                                    </label>
+
+                                    <br>
+                                {% endfor %}
+                             </div>
+                        </form>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td valign="top" colspan="2" align="center">
+
+                        <!--<input id="start_alert" type="button" onclick="send_alert();" value="Запуск оповещения" width="600">-->
+                        <!--<a class="button30" href="javascript:void(0)" onclick="send_alert();"><div align="center"><br>Пуск!</div></a>-->
+                        <input type="button" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Запуск" onclick="send_alert();"/>
+                    </td>
+
+
+                </tr>
+            </tbody>
+        </table>
+
+
+</div>
 
 {% endblock %}
