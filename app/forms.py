@@ -6,8 +6,8 @@ class LoginForm(Form):
     '''
     Класс, описывающий форму входа
     '''
-    login = StringField('login', validators = [DataRequired()])
-    password = PasswordField('password', validators = [DataRequired()])
+    login = StringField('login', validators = [DataRequired()], render_kw={"placeholder": "Логин"})
+    password = PasswordField('password', validators = [DataRequired()],render_kw={"placeholder": "Пароль"})
 
 class AdminForm(Form):
     '''
@@ -19,6 +19,6 @@ class AdminForm(Form):
     role = StringField('role')
 
 class CreateForm(Form):
-    name = StringField('name', validators = [DataRequired()])
+    name = StringField('name', validators = [DataRequired()], render_kw={"placeholder": "Название"})
 
 

@@ -66,41 +66,52 @@ function save() {
     var leng = dat.options.length;
     var send_arr = [];
     var list_id = document.getElementById('list_id');
+    
+    var list_name = document.getElementById('list_name');
     // обойти все элементы списка, создать массив
     for (var i = 0; i < leng; i++) {
-        send_arr[i]=dat.options[i].value;
+        send_arr[i] = dat.options[i].value;
     }
     // Отправить json-массив на сервер
 
     $.ajax({
-                    dataType: "json",
-                    type: "POST",
-                    async: true,
-                    contentType: 'application/json',
-                    url: "/modify_list/" + list_id.value,
-                    data: JSON.stringify( {list: send_arr}),
-                    //data: {list: send_arr},
-                    //data: {list: 'tets'},
+        dataType: "json",
+        type: "POST",
+        async: true,
+        contentType: 'application/json',
+        url: "/list/modify/" + list_id.value,
+        data: JSON.stringify({
+            list: send_arr,
+            name: list_name.value,
 
-                    success: function () {
-                        //alert('OK');
+        }),
+        //data: {list: send_arr},
+        //data: {list: 'tets'},
 
-                    },
-                    complete: function () {
-                        alert('OK')
-                    }
-                });
+        success: function () {
+            //alert('OK');
 
-
-
-    /*
-    $.post(
-        "/modify_list/"+ list_id.value,
-        {'data[]': JSON.stringify(send_arr) },
-        function (result) {
-            alert('ok');
+        },
+        complete: function () {
+            //alert('OK')
+            location.replace("/index");
         }
-    );
+    });
+}
 
-    */
+
+
+
+
+function delete_list() {
+    var id_list = document.getElementById('list_id');
+    var url_to_delete = '/list/delete/' + id_list.value;
+    if (confirm("Удалить список?")) {
+        location.replace(url_to_delete);
+    } else {
+        return false;
+    }
+
+
+
 }

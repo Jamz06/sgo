@@ -1,48 +1,6 @@
- function acceptChanges() {
-            //attempt to save editing cell.
-            //debugger;
-            if (grid.saveEditCell() === false) {
-                return false;
-            }
 
-            var isDirty = grid.isDirty();
-            if (isDirty) {
-                //validate the new added rows.
-                var addList = grid.getChanges().addList;
-                for (var i = 0; i < addList.length; i++) {
-                    var rowData = addList[i];
-                    var isValid = grid.isValid({ "rowData": rowData }).valid;
-                    if (!isValid) {
-                        return;
-                    }
-                }
-                var changes = grid.getChanges({ format: "byVal" });
-
-                //post changes to server
-                $.ajax({
-                    dataType: "json",
-                    type: "POST",
-                    async: true,
-                    beforeSend: function (jqXHR, settings) {
-                        grid.showLoading();
-                    },
-                    url: "/numbers_batch", //for ASP.NET, java
-                    data: { list: JSON.stringify(changes) },
-                    success: function (changes) {
-                        //debugger;
-                        grid.commit({ type: 'add', rows: changes.addList });
-                        grid.commit({ type: 'update', rows: changes.updateList });
-                        grid.commit({ type: 'delete', rows: changes.deleteList });
-
-                    },
-                    complete: function () {
-                        grid.hideLoading();
-                    }
-                });
-            }
-}
-
-$(document).ready(function(){
+$(function () {
+//$(document).ready(function(){
         var obj = {
             hwrap: false,
             resizable: true,
@@ -79,6 +37,8 @@ $(document).ready(function(){
                         },
                         options: { disabled: true }
                     },
+
+
                     {
                         type: "<span class='saving'>Сохранение...</span>"
                     }
@@ -93,12 +53,14 @@ $(document).ready(function(){
             editModel: {
                 allowInvalid: true,
                 saveKey: $.ui.keyCode.ENTER
+
             },
             editor: {
                 select: true
             },
             title: "<b>Редактирование номеров</b>",
-            change: function (evt, ui) {                
+
+            change: function (evt, ui) {
                 
                 if (ui.source == 'commit' || ui.source == 'rollback') {
                     return;
@@ -203,6 +165,7 @@ $(document).ready(function(){
                     }
                 }
             ],
+            /*
             onSelectRow: function(id) {
                 if (id && id !== lastSel) {
                     jQuery('#TableContainer').restoreRow(lastSel);
@@ -213,6 +176,7 @@ $(document).ready(function(){
                      lastSel = id;
                 }
              },
+             */
             pageModel: { type: "local", rPP: 20 },
             dataModel: {
                 dataType: "JSON",
@@ -221,6 +185,11 @@ $(document).ready(function(){
                 url: "/numbers_data",
                 getData: function (response) {
                     return { data: response.data };
+                }
+            },
+            quitEditMode: function (evt, ui) {
+                if (evt.keyCode != $.ui.keyCode.ESCAPE) {
+                    $grid.pqGrid("saveEditCell");
                 }
             },
             load: function (evt, ui) {

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
+<script type="text/javascript" src="/static/js/jquery-ui/jquery-ui.js" ></script>
 <script type="text/javascript" src="/static/js/list.js"></script>
 
 
@@ -8,10 +9,13 @@
 
 <input id="list_id" value="{{list_id}}" style="visibility: hidden">
 
-<div class="index">
+<div class="index" style="width: 70%;">
     <form method="POST" action="">
 
-            <h1>Список: {{list_name}}</h1>
+            <h1>Список:
+                <input id="list_name" type="text" value="{{list_name}}"/>
+            </h1>
+        <!--<a class="list" href="#" onclick="delete_list()">Удалить</a>-->
 
             <table cellspacing="0", cellpadding="8" border="0" width="100%">
                 <tbody>
@@ -22,7 +26,7 @@
                         </label>
 
                         <br>
-                        <select id="left_list" name="available_numbers" multiple="multiple" size="20" style="height: 400px; width: 250px;"
+                        <select id="left_list" align="center" name="available_numbers" multiple="multiple" size="20" style="height: 400px; width: 350px;"
                                 ondblclick="list_move('right');">
                             {% for number in numbers %}
                                 <option value="{{number.id}}">{{number.number}} | {{number.comment}}</option>
@@ -60,7 +64,7 @@
                         Выбранные
                         </label>
                         <br>
-                        <select id="right_list" size="20" name="list_numbers[]" multiple="multiple" style="height: 400px; width: 250px;"
+                        <select id="right_list" align="center"  size="20" name="list_numbers[]" multiple="multiple" style="height: 400px; width: 350px;"
                                 ondblclick="list_move('left');">
                             {% for list in user_list %}
 
@@ -75,6 +79,7 @@
                         <!--<input type="submit" value="Сохранить" onclick="save();">-->
                         <!--<a href="##" class="" onclick="save();">Сохранить</a>-->
                         <input type="button" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Сохранить" onclick="save();"/>
+                        <input type="button" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Удалить список" onclick="delete_list();"/>
                     </td>
                 </tr>
                 </tbody>

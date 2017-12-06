@@ -4,7 +4,9 @@
 
 
 <script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
+<script type="text/javascript" src="/static/js/jquery-ui/jquery-ui.js" ></script>
 <script type="text/javascript" src="/static/js/send_alert.js"></script>
+
 
 <div class="index">
 
@@ -20,7 +22,14 @@
                                     {% for alarm in alarms %}
 
                                         <input  type="radio" id="alarm-{{alarm.id}}" name="alarm_type" value="{{ alarm.id }}">
-                                        <label for="alarm-{{alarm.id}}">{{ alarm.name }}</label>
+                                        <label for="alarm-{{alarm.id}}">
+                                            <!--<a class="list" id="{{alarm.id}}" name="{{alarm.name}}" onclick="modify_alarm(this);" href="javascript:void(0);">{{ alarm.name }}</a>-->
+                                            {% if alarm.id > 6 %}
+                                                <a class="list" id="{{alarm.id}}" name="{{alarm.name}}" onclick="editAlarm(this);" href="javascript:void(0);">{{ alarm.name }}</a>
+                                            {% else %}
+                                                {{ alarm.name }}
+                                            {% endif %}
+                                        </label>
                                     {% endfor %}
                                 </div>
 
@@ -69,5 +78,18 @@
 
 
 </div>
+
+<div id="alarm_div" title="Изменить тревогу" style="display: none;">
+    <form name="modify_alarm" method="post" action="/alarm/modify">
+
+        <input type="text" id="alarm_name_change">
+        <!--<label for="alarm_name_change">Текст тревоги</label>-->
+        <input id="alarm_id" value="" style="visibility: hidden">
+        <input class="btn btn-primary btn-block btn-large" type="button" value="Изменить" onclick="modAlarmSend('update');">
+        <input class="btn btn-primary btn-block btn-large" type="button" value="Удалить" onclick="modAlarmSend('delete');">
+        <input class="btn btn-primary btn-block btn-large" type="button" id="btnDisp" value="Отмена">
+    </form>
+</div>
+
 
 {% endblock %}

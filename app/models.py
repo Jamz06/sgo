@@ -88,6 +88,9 @@ class Alarms(db.Model):
         self.name = name
         self.user = user
 
+    def __repr__(self):
+        return str("<Тревога! Сигнал: %s>" % self.name)
+
 class Included_numbers(db.Model):
     '''
         Описание таблицы отношения номеров к спискам

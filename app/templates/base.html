@@ -10,7 +10,7 @@
         <link rel="shortcut icon" href="/static/k.ico"/>
         <link rel="stylesheet" href="/static/web.css">
         <!--<link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.theme.css" />-->
-        <link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.custom.css" />
+        <link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.min.css" />
         <link rel="stylesheet" href="/static/js/jquery-ui/jquery-ui.structure.css" />
         <link rel="stylesheet" href="/static/js/grid-2.2.0/pqgrid.min.css" />
 
@@ -41,15 +41,9 @@
             </nav>
         <!--</div>-->
         <!--<hr>-->
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul style="color: #3A7734">
-            {% for message in messages %}
-                <li>{{message}}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% endwith %}
+
+
+
         <h1 align="center">
             {% if user.organization %}
                 {{user.organization}}
@@ -58,5 +52,19 @@
             {% endif %}
         </h1>
         {% block content %} {% endblock %}
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="notify success" >
+
+
+                    <ul> <!--style="color: #3A7734"-->
+                        {% for message in messages %}
+                            <li >{{message}}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
     </body>
 </html>

@@ -4,6 +4,7 @@ from app import app, db, lm
 from .forms import LoginForm, AdminForm, CreateForm
 from .models import Users, Alarms, Lists, Numbers, Included_numbers
 from sqlalchemy import or_, update, delete
+from .sms_config import Sms
 
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 FlaskJSON(app)
@@ -35,7 +36,11 @@ def get_numbers_data(user_id):
 @app.route('/index', methods=['GET'])
 @login_required
 def index():
-    # user = { 'nickname': 'Lihoded' }
+    '''
+    Главная страница.
+    :return:
+    '''
+
     user = g.user
 
     # Передать массив тревог на страницу:
@@ -69,6 +74,7 @@ def create(action):
             flash('Создан новый список ' + form.name.data )
             return redirect(url_for('index'))
         elif action == 'alarm':
+            print('Create ALARM')
             alarm = Alarms(form.name.data, user.id)
             db.session.add(alarm)
             db.session.commit()
@@ -78,11 +84,15 @@ def create(action):
         return redirect(url_for('index'))
 
 
-    return render_template('create.html', form=form, action=action, title='Создать.. ')
+    return render_template('create.html', form=form, action=action, title='Создать.. ', user=user)
 
 # Маршрут логина
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    '''
+    Путь для Логина. Рисует форму входа для неавторизованных. остальных возвращает на главную.
+    :return:
+    '''
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -103,15 +113,28 @@ def login():
 
 @app.route('/logout')
 def logout():
+    '''
+    Выход из сессии. Редиректит на главную.
+    :return:
+    '''
     logout_user()
     return redirect(url_for('index'))
 
 @app.before_request
 def before_request():
+    '''
+    При любом запросе, получаем в глобальную переменную пользователя
+    :return:
+    '''
     g.user = current_user
 
 @lm.user_loader
 def load_user(id):
+    '''
+    Загрузка параметров пользователя.
+    :param id:
+    :return:
+    '''
     return Users.query.get(int(id))
 
 
@@ -120,30 +143,37 @@ def load_user(id):
 def numbers():
     user = g.user
 
-    return render_template('numbers.html')
+    return render_template('numbers.html', user = user)
 
 
 @app.route('/admin', methods= ['GET', 'POST'])
 @login_required
 def admin():
+    '''
+    Форма администрирования.
+    :return:
+    '''
     user = g.user
     if user.role != 1:
         return redirect(url_for('index'))
     form = AdminForm()
+
     if form.validate_on_submit():
-        foo = Users.hash_password(form.password.data)
-        flash('login ="' + form.login.data + '", password="' + str(foo))
-        me = Users(form.login.data, str(foo), form.organization.data, int(form.role.data))
-        db.session.add(me)
-        db.session.commit()
-        return redirect('/admin')
+         foo = Users.hash_password(form.password.data)
+         flash('login ="' + form.login.data + '", password="' + str(foo))
+         me = Users(form.login.data, str(foo), form.organization.data, int(form.role.data))
+         db.session.add(me)
+         db.session.commit()
+         return redirect('/admin')
 
     return render_template('admin.html',
-                           form = form
+                           form = form,
+                           user = user
                            )
 
 @app.route('/static/<path:path>')
-@login_required
+# Статику отдаем без авторизации
+# @login_required
 def send_js(path):
     # Отладочный вывод с информацией о запросе файла
     # flash("path is: " + path)
@@ -170,7 +200,8 @@ def numbers_batch():
         number = Numbers(user.id, data_line['number'], data_line['comment'])
         db.session.add(number)
         db.session.commit()
-        return jsonify(get_numbers_data(user.id))
+        data['addList'] = get_numbers_data(user.id)
+        return jsonify(data)
 
     if data['updateList']:
         print(len(data['updateList']))
@@ -181,7 +212,9 @@ def numbers_batch():
         })
         db.session.commit()
         # Numbers.query.filter_by(id=data_line['id']).update({'number': data_line['number']})
-        return jsonify(get_numbers_data(user.id))
+        data['updateList'] = get_numbers_data(user.id)
+        return jsonify(data)
+        #return jsonify(get_numbers_data(user.id))
     else:
         print("Update is empty")
 
@@ -192,7 +225,9 @@ def numbers_batch():
         db.session.query(Numbers).filter_by(id=data_line['id']).delete()
         #db.session.delete(number)
         db.session.commit()
-        return jsonify(get_numbers_data(user.id))
+        data['deleteList'] = get_numbers_data(user.id)
+        return jsonify(data)
+        #return jsonify(get_numbers_data(user.id))
 
 
     return  json_response(200)
@@ -211,45 +246,164 @@ def numbers_data():
 
     return jsonify(data=json_numbers)
 
-@app.route('/modify_list/<list_id>', methods=['POST', 'GET'])
+# @app.route('/modify_list/<list_id>', methods=['POST', 'GET'])
+@app.route('/list/<action>/<list_id>', methods=['POST', 'GET'])
 @login_required
-def modify_list(list_id):
+def modify_list(action, list_id):
     user = g.user
+    lists = Lists.query.filter_by(id=list_id).first()
 
-    if request.method == 'POST':
-        data = request.get_json(force=True)
-
-        # дропаем все номера в списке
+    def delete_list(list_id):
         db.session.query(Included_numbers).filter_by(list=list_id).delete()
         db.session.commit()
-        # Занести обновленный список в БД
-        for elem in data['list']:
-            print(elem)
-            inc_num = Included_numbers(list_id, elem)
-            db.session.add(inc_num)
+        return None
+
+    if action == 'modify':
+        if request.method == 'POST':
+            data = request.get_json(force=True)
+
+            # дропаем все номера в списке
+            delete_list(list_id)
+            # Занести обновленный список в БД
+
+
+
+
+
+            for elem in data['list']:
+                print(elem)
+                inc_num = Included_numbers(list_id, elem)
+                db.session.add(inc_num)
+                db.session.commit()
+
+            # Если имя изменилось, то обновить в БД
+
+            if lists.name != data['name']:
+
+                db.session.query(Lists).filter_by(id=list_id).update({
+                                                                    'name': data['name']
+                                                                   })
+                db.session.commit()
+
+
+            flash("Список сохранен")
+            # Надо будет сделать проверку. Если что не так, вернуть другой ответ.
+            return json_response(200)
+        else:
+            # Получить список всех номеров. Кроме тех, что в списке
+            numbers = Numbers.query.filter_by(user=user.id)
+
+
+            # Получить название списка по ID
+
+            # По ID списка, получить ID номеров.
+            user_list = db.session.query(Numbers.id, Numbers.number, Numbers.comment).filter(Included_numbers.list == list_id).\
+                filter(Numbers.id == Included_numbers.number).all()
+
+            result_numbers = [
+                numbers.__dict__ for numbers in numbers.all()
+            ]
+            i = 0
+            # Пробежаться по массиву номеров
+            for num in result_numbers:
+                # Отсеять номера, которые уже есть в этом списке
+                for num_in_list in user_list:
+                    # Если номер в списке, то удалить из массива номеров элемент.
+                    if num['number'] == num_in_list[1]:
+
+                        result_numbers.remove(num)
+                        i -= 1
+
+                i += 1
+            # По ID номеров, получить номера в списке.
+
+            return (render_template('list.html',
+                                    list_name=lists.name,
+                                    numbers=result_numbers,
+                                    user_list=user_list,
+                                    list_id=list_id,
+                                    user=user
+
+                                    )
+                    )
+
+
+    elif action == 'delete':
+        delete_list(list_id)
+        db.session.query(Lists).filter_by(id=list_id).delete()
+        db.session.commit()
+        flash('Список  удален')
+        return redirect(url_for('index'))
+
+
+@app.route('/alert_send/<alert_id>', methods=['POST'])
+@login_required
+def alert_send(alert_id):
+    sms = Sms()
+    data = request.get_json(force=True)
+
+    # Выбрать параметры тревоги из БД
+    alert = Alarms.query.filter_by(id=alert_id).first()
+    # alert = db.session.query(Alarms.name).filter(Alarms.id == alert_id)
+    #alert_r = [alert for alert in alert.name]
+    #alert_r = ''.join(alert_r)
+    # alert_r = 'Тревога! Сигнал:' + alert_r
+    #alert_r = "Тест"
+    # print(alert_r)
+    # Для каждого списка, отправить оповещение
+    for elem in data['list']:
+        user_list = db.session.query(Numbers.number).filter(
+            Included_numbers.list == elem). \
+            filter(Numbers.id == Included_numbers.number)
+
+        for num in user_list:
+            print('Number to alert: ' + str(num))
+
+            sms.send(alert.__repr__(), str(num[0]))
+            # Отправить на номер смс!
+
+
+    return json_response(200)
+
+@app.route('/help')
+@login_required
+def help():
+    user = g.user
+    return render_template('help.html', user=user)
+
+
+@app.route('/alarm/<action>/<id>', methods=['POST'])
+@login_required
+def alarm(action,id):
+
+    '''
+    Функция операции над оповещением.
+    :param action: принимает действие: modify или delete
+    :return: Возвращает обратно на главную старнницу.
+    '''
+    user = g.user
+    data = request.get_json(force=True)
+
+    if action == 'modify':
+        # изменить имя тревоги.
+        try:
+            db.session.query(Alarms).filter_by(id=id).update({
+                'name': data['name']
+            })
             db.session.commit()
+        except SQLAlchemyError:
+            return json_response(501)
 
-        flash("Список сохранен")
-        # Надо будет сделать проверку. Если что не так, вернуть другой ответ.
+        flash('Оповещение  изменено')
         return json_response(200)
-    else:
-        # Получить список всех номеров.
-        numbers = Numbers.query.filter_by(user=user.id)
 
-        # Получить название списка по ID
-        lists = Lists.query.filter_by(id=list_id).first()
-        # По ID списка, получить ID номеров.
-        user_list = []
-        # По ID номеров, получить номера в списке.
+    elif action == 'delete':
+        # Удалить тревогу.
+        try:
+            db.session.query(Alarms).filter_by(id=id).delete()
+            db.session.commit()
+        except SQLAlchemyError:
+            return json_response(501)
 
-        return (render_template('list.html',
-                                list_name=lists.name,
-                                numbers=numbers,
-                                user_list=user_list,
-                                list_id=list_id
-
-                                )
-                )
-
-
-
+        flash('Оповещение  удалено')
+        return json_response(200)

@@ -11,3 +11,6 @@ SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 CSRF_ENABLED = True
 # Используется для создания криптографического токена, который используется при валидации формы
 SECRET_KEY = 'mxP7U87p6htYeCgJNR9k'
+
+
+

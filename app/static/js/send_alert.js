@@ -27,7 +27,7 @@ function send_alert() {
 
     /// Отправить задание на оповещение. POST
     if (alert_id != '' && list_ids[0] != 'undefined') {
-        /*
+
         $.ajax({
             dataType: "json",
             type: "POST",
@@ -40,13 +40,73 @@ function send_alert() {
 
             },
             complete: function () {
+                alert('OK')
+            }
+        });
+
+        //alert('Старт оповещения ' + list_ids[0]);
+    } else {
+        alert('Не выбран тип тревоги или хотябы один список!');
+    }
+
+}
+
+function editAlarm(Element) {
+    $( "#alarm_div").dialog();
+    $( "#btnDisp").hide();
+
+    alarmEditField = document.getElementById('alarm_name_change');
+    alarmEditField.placeholder = Element.name;
+
+    alarm_id = document.getElementById('alarm_id');
+    alarm_id.value = Element.id;
+
+}
+
+function modAlarmSend(param) {
+    alarmEditField = document.getElementById('alarm_name_change');
+    alarm_id = document.getElementById('alarm_id');
+
+
+    if (param == 'update') {
+        //Подготовить json
+
+        var send_data = alarmEditField.value;
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            async: true,
+            contentType: 'application/json',
+            url: "/alarm/modify/" + alarm_id.value,
+            data: JSON.stringify({name: send_data}),
+            success: function () {
+                location.reload();
+                $( "#btnDisp").hide();
+
+            },
+            complete: function () {
                 //alert('OK')
             }
         });
-        */
-        alert('Старт оповещения ' + list_ids[0]);
-    } else {
-        alert('Не выбран тип тревоги или хотябы один список!');
+    } else if (param == 'delete') {
+        //Подготовить json
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            async: true,
+            contentType: 'application/json',
+            url: "/alarm/delete/" + alarm_id.value,
+            data: JSON.stringify({name: send_data}),
+            success: function () {
+                location.reload();
+                $( "#btnDisp").hide();
+            },
+            complete: function () {
+                //alert('OK')
+            }
+        });
+
+
     }
 
 }
