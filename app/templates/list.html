@@ -9,7 +9,7 @@
 
 <input id="list_id" value="{{list_id}}" style="visibility: hidden">
 
-<div class="index" style="width: 70%;">
+<div class="index" style="width: 50%;">
     <form method="POST" action="">
 
             <h1>Список:
@@ -20,7 +20,7 @@
             <table cellspacing="0", cellpadding="8" border="0" width="100%">
                 <tbody>
                 <tr>
-                    <td>
+                    <td align="center">
                         <label class="marker" for="left_list">
                             Доступные номера
                         </label>
@@ -33,7 +33,7 @@
                             {% endfor %}
                         </select>
                     </td>
-                    <td align="left">
+                    <td align="center">
                         <!--
                         <a href="#" class="list" onclick="list_move('right'); //return false;">=></a>
                         <a href="#" class="list" onclick="list_move('left'); //return false;"><=</a>
@@ -59,7 +59,7 @@
                         </button>
                         -->
                     </td>
-                    <td>
+                    <td align="center">
                         <label class="marker" for="right_list">
                         Выбранные
                         </label>

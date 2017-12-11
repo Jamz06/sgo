@@ -1,13 +1,27 @@
+# -*- coding: utf-8 -*-
+import os, io, shutil
 from flask import render_template, flash, redirect, url_for, session, request, g, send_from_directory, jsonify
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
 from .forms import LoginForm, AdminForm, CreateForm
 from .models import Users, Alarms, Lists, Numbers, Included_numbers
 from sqlalchemy import or_, update, delete
-from .sms_config import Sms
+from sqlalchemy.exc import IntegrityError
 
+from .sms_config import Sms
+from werkzeug.utils import secure_filename
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 FlaskJSON(app)
+
+ALLOWED_EXTENSIONS = set(['txt', 'csv'])
+def allowed_file(filename):
+    '''
+    Функция проверки загруженного файла
+    :param filename:
+    :return:
+    '''
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 def get_numbers_data(user_id):
     '''
@@ -407,3 +421,61 @@ def alarm(action,id):
 
         flash('Оповещение  удалено')
         return json_response(200)
+
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload():
+    #
+    user = g.user
+    file = request.files['file']
+    # Принять и сохранить файл
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(save_path)
+
+        # Перекодировать файл
+        with io.open(save_path, encoding='latin-1', errors='ignore') as source:
+            with io.open(save_path + "_tmp", mode='w', encoding='utf-8') as target:
+                shutil.copyfileobj(source, target)
+
+        # Удалить оригинал, заменить на перекодированный
+        os.remove(save_path)
+        os.rename(save_path + "_tmp",save_path)
+
+        # открыть файл
+        numbers_file = open(save_path, 'r')
+
+        # Читать построчно:
+        for line in numbers_file:
+            # разделить строку на значения
+            numbers_line = line.split(';')
+            # Занести в таблицу
+
+            try:
+                comment = numbers_line[1]
+            except IndexError:
+                print("Комента нет")
+                comment = ""
+
+            if numbers_line != "":
+                num =  numbers_line[0].replace(u'\ufeff', '')
+
+            # print(str(user.id) + "  " + str(numbers_line[0]) + "  " + str(comment))
+            try:
+                number = Numbers(user.id, num, comment)
+                db.session.add(number)
+                db.session.commit()
+            except IntegrityError as err:
+                print("Ошибка SQL")
+                print(err)
+                db.session.rollback()
+
+    # Удалить файл после обработки
+    os.remove(save_path)
+
+    return redirect(url_for('numbers'))
+
+
+

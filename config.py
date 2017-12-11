@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 # Базовый путь проекта
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -13,4 +14,6 @@ CSRF_ENABLED = True
 SECRET_KEY = 'mxP7U87p6htYeCgJNR9k'
 
 
+UPLOAD_FOLDER = '/tmp'
+ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 

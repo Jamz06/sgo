@@ -7,9 +7,29 @@
 <script type="text/javascript" src="/static/js/jquery-ui/jquery-ui.js" ></script>
 <script type="text/javascript" src="/static/js/pqgrid.min.js"></script>
 <script type="text/javascript" src="/static/js/test-grid.js"></script>
+<script type="text/javascript" >
+
+    function ShowUpload() {
+    $( "#upload_div").dialog();
+    $( "#btnDisp").hide();
 
 
+
+}
+
+</script>
+<input type="button" class="btn btn-primary btn-block btn-large" value="Загрузить файл" onclick="ShowUpload();"/>
+<div id="upload_div" title="Загрузить номера" style="display: none;">
+    <form name="upload_numbers" method="POST" action="/upload" enctype="multipart/form-data">
+
+        <input type="file" name="file"/>
+        <input type="submit" class="btn btn-primary btn-block btn-large" value="Загрузить">
+        <input class="btn btn-primary btn-block btn-large" type="button" id="btnDisp" value="Отмена">
+    </form>
+</div>
 
 <div id="TableContainer" style="margin: auto;"></div>
+
+
 
 {% endblock %}

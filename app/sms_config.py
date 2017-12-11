@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###SMS CONF###
 
 from urllib import request
