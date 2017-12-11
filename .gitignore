@@ -9,7 +9,7 @@ lib/*
 
 bin/
 bin/*
-
+logs/*
 share/
 share/*
 
