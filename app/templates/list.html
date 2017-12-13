@@ -9,7 +9,7 @@
 
 <input id="list_id" value="{{list_id}}" style="visibility: hidden">
 
-<div class="index" style="width: 50%;">
+<div class="index" style="width: 70%;">
     <form method="POST" action="">
 
             <h1>Список:
@@ -26,7 +26,7 @@
                         </label>
 
                         <br>
-                        <select id="left_list" align="center" name="available_numbers" multiple="multiple" size="20" style="height: 400px; width: 350px;"
+                        <select id="left_list" align="center" name="available_numbers" multiple="multiple" size="20" style="height: 400px; width: 100%;"
                                 ondblclick="list_move('right');">
                             {% for number in numbers %}
                                 <option value="{{number.id}}">{{number.number}} | {{number.comment}}</option>
@@ -64,7 +64,7 @@
                         Выбранные
                         </label>
                         <br>
-                        <select id="right_list" align="center"  size="20" name="list_numbers[]" multiple="multiple" style="height: 400px; width: 350px;"
+                        <select id="right_list" align="center"  size="20" name="list_numbers[]" multiple="multiple" style="height: 400px; width: 100%;"
                                 ondblclick="list_move('left');">
                             {% for list in user_list %}
 
