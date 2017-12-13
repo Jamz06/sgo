@@ -49,7 +49,7 @@ def get_numbers_data(user_id):
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
-
+#
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
@@ -158,7 +158,7 @@ def before_request():
     :return:
     '''
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(minutes=30)
     g.user = current_user
 
 @lm.user_loader

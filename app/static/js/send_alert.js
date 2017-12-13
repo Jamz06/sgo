@@ -78,7 +78,7 @@ function editAlarm(Element) {
     $( "#btnDisp").hide();
 
     alarmEditField = document.getElementById('alarm_name_change');
-    alarmEditField.placeholder = Element.name;
+    alarmEditField.value = Element.name;
 
     alarm_id = document.getElementById('alarm_id');
     alarm_id.value = Element.id;
