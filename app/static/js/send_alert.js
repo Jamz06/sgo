@@ -1,3 +1,23 @@
+function loading(param) {
+    //Функция отображения загрузки
+    alarm_button = document.getElementById('start_alarm');
+    if (param == '1') {
+        alarm_button.value = "Подождите, отправляется оповещение";
+        alarm_button.disabled = true;
+        //alarm_button.prop("disabled");
+        //alarm_button.prop("value", "Подождите, отправляется оповещение");
+    } else {
+        alarm_button.value = "Запуск";
+        alarm_button.disabled = false;
+        //alarm_button.removeProp("disabled");
+        //alarm_button.prop("value", "Запуск");
+    }
+
+
+
+}
+
+
 function send_alert() {
     // Все типы тревог
     alerts = document.getElementsByName('alarm_type');
@@ -35,12 +55,14 @@ function send_alert() {
             contentType: 'application/json',
             url: "/alert_send/" + alert_id,
             data: JSON.stringify({list: list_ids}),
+            beforeSend: loading("1"),
             success: function () {
-                alert('Старт оповещения');
+                //alert('Старт оповещения');
 
             },
             complete: function () {
-                alert('OK')
+                loading("0")
+                alert('Выполнено')
             }
         });
 

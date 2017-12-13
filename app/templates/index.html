@@ -16,7 +16,7 @@
                     <td align="left" valign="top">
 
 
-
+                        <p class="paragraph">Оповещения:</p>
                             <form id="alert_form" >
                                 <div class="checkboxes-and-radios">
                                     {% for alarm in alarms %}
@@ -40,6 +40,7 @@
 
                     <td  valign="top">
                         <!--<p >Списки</p> <br>-->
+                        <p class="paragraph"> Списки оповещений:</p>
 
                         <form id="list_form">
                              <div class="checkboxes-and-radios">
@@ -68,7 +69,7 @@
 
                         <!--<input id="start_alert" type="button" onclick="send_alert();" value="Запуск оповещения" width="600">-->
                         <!--<a class="button30" href="javascript:void(0)" onclick="send_alert();"><div align="center"><br>Пуск!</div></a>-->
-                        <input type="button" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Запуск" onclick="send_alert();"/>
+                        <input id="start_alarm" type="button" class="btn btn-primary btn-block btn-large" style="width: 100%" value="Запуск" onclick="send_alert();"/>
                     </td>
 
 
@@ -90,6 +91,18 @@
         <input class="btn btn-primary btn-block btn-large" type="button" id="btnDisp" value="Отмена">
     </form>
 </div>
+
+<div id="create_object" title="Создать" style="display: none;">
+    <form name="create" method="post" action="">
+
+        <input type="text" id="object_name">
+
+        <input class="btn btn-primary btn-block btn-large" type="button" value="Создать" onclick="">
+        <input class="btn btn-primary btn-block btn-large" type="button" id="btnDisp1" value="Отмена">
+
+    </form>
+</div>
+
 
 
 {% endblock %}

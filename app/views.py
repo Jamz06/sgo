@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, io, shutil
+from datetime import timedelta
 from flask import render_template, flash, redirect, url_for, session, request, g, send_from_directory, jsonify
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
@@ -34,7 +35,7 @@ def get_numbers_data(user_id):
     # print(json_numbers[0])
     json_numbers = []
     for number in numbers:
-        print(number.number)
+
         json_numbers.append(
             {
                 'id': number.id,
@@ -44,7 +45,15 @@ def get_numbers_data(user_id):
         )
     return json_numbers
 
+# Обработчики ошибок:
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
 
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500
 
 @app.route('/')
 @app.route('/index', methods=['GET'])
@@ -80,15 +89,19 @@ def create(action):
     user = g.user
 
     if form.validate_on_submit():
-
+        app.logger.info('User = ' + str(user.id) + " " + str(user.organization))
+        app.logger.info('Data = ' + str(form.name.data))
         if action == 'list':
+            app.logger.info('Create list')
+
             list = Lists(form.name.data, user.id)
             db.session.add(list)
             db.session.commit()
             flash('Создан новый список ' + form.name.data )
             return redirect(url_for('index'))
         elif action == 'alarm':
-            print('Create ALARM')
+            app.logger.info('Create ALARM')
+
             alarm = Alarms(form.name.data, user.id)
             db.session.add(alarm)
             db.session.commit()
@@ -116,7 +129,10 @@ def login():
             username = {'nickname': form.login.data}
             # flash('login ="' + form.login.data + '", password="' + str(form.password.data))
             login_user(user)
+            app.logger.info("Loginning in user = " + str(user.id))
+
             if user.role == 1:
+                app.logger.info("Admin is loggining, id = " + str(user.id) )
                 return  redirect(url_for('admin'))
             return redirect(url_for('index'))
 
@@ -132,6 +148,7 @@ def logout():
     :return:
     '''
     logout_user()
+    app.logger.info("Log off user ")
     return redirect(url_for('index'))
 
 @app.before_request
@@ -140,6 +157,8 @@ def before_request():
     При любом запросе, получаем в глобальную переменную пользователя
     :return:
     '''
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=5)
     g.user = current_user
 
 @lm.user_loader
@@ -205,11 +224,12 @@ def numbers_batch():
 
     data = request.get_json(force=True)
 
-    print(dict.keys(data))
+    #print(dict.keys(data))
     # print(data['addList'])
+    app.logger.info("numbers_batch user = " + str(user.id))
     if data['addList']:
-        print(len(data['addList'][0]))
-        print(data['addList'][0]['number'])
+        #print(len(data['addList'][0]))
+        app.logger.info("Add Number" + str(data['addList'][0]['number']))
         data_line = data['addList'][0]
         number = Numbers(user.id, data_line['number'], data_line['comment'])
         db.session.add(number)
@@ -218,8 +238,9 @@ def numbers_batch():
         return jsonify(data)
 
     if data['updateList']:
-        print(len(data['updateList']))
+        #print(len(data['updateList']))
         data_line = data['updateList'][0]
+        app.logger.info("Update number " + str(data_line['number']))
         db.session.query(Numbers).filter_by(id=data_line['id']).update({
             'number': data_line['number'],
             'comment': data_line['comment']
@@ -230,11 +251,12 @@ def numbers_batch():
         return jsonify(data)
         #return jsonify(get_numbers_data(user.id))
     else:
-        print("Update is empty")
+        app.logger.info("Update is empty")
 
 
     if data['deleteList']:
         data_line = data['deleteList'][0]
+        app.logger.info("Delete number " + data_line['id'])
         #number = Numbers.query.filter_by(id=data_line['id'])
         db.session.query(Numbers).filter_by(id=data_line['id']).delete()
         #db.session.delete(number)
@@ -266,7 +288,7 @@ def numbers_data():
 def modify_list(action, list_id):
     user = g.user
     lists = Lists.query.filter_by(id=list_id).first()
-
+    app.logger.info("List %s action %s user is %s",list_id, action, user.organization)
     def delete_list(list_id):
         db.session.query(Included_numbers).filter_by(list=list_id).delete()
         db.session.commit()
@@ -285,7 +307,7 @@ def modify_list(action, list_id):
 
 
             for elem in data['list']:
-                print(elem)
+                #print(elem)
                 inc_num = Included_numbers(list_id, elem)
                 db.session.add(inc_num)
                 db.session.commit()
@@ -353,6 +375,8 @@ def modify_list(action, list_id):
 @app.route('/alert_send/<alert_id>', methods=['POST'])
 @login_required
 def alert_send(alert_id):
+
+    user = g.user
     sms = Sms()
     data = request.get_json(force=True)
 
@@ -365,13 +389,15 @@ def alert_send(alert_id):
     #alert_r = "Тест"
     # print(alert_r)
     # Для каждого списка, отправить оповещение
+    app.logger.info('Starting alert %s user is %s, alertId is %s ', alert.__repr__(), user.organization, alert_id)
+
     for elem in data['list']:
         user_list = db.session.query(Numbers.number).filter(
             Included_numbers.list == elem). \
             filter(Numbers.id == Included_numbers.number)
 
         for num in user_list:
-            print('Number to alert: ' + str(num))
+            app.logger.info('Number to send alert: %s', str(num))
 
             sms.send(alert.__repr__(), str(num[0]))
             # Отправить на номер смс!
@@ -468,8 +494,8 @@ def upload():
                 db.session.add(number)
                 db.session.commit()
             except IntegrityError as err:
-                print("Ошибка SQL")
-                print(err)
+                app.logger.info("Ошибка SQL user is %s", user.organization)
+                app.logger.info(err)
                 db.session.rollback()
 
     # Удалить файл после обработки
