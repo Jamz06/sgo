@@ -53,7 +53,7 @@ function send_alert() {
             type: "POST",
             async: true,
             contentType: 'application/json',
-            url: "/alert_send/" + alert_id,
+            url: "alert_send/" + alert_id,
             data: JSON.stringify({list: list_ids}),
             beforeSend: loading("1"),
             success: function () {
@@ -99,7 +99,7 @@ function modAlarmSend(param) {
             type: "POST",
             async: true,
             contentType: 'application/json',
-            url: "/alarm/modify/" + alarm_id.value,
+            url: "alarm/modify/" + alarm_id.value,
             data: JSON.stringify({name: send_data}),
             success: function () {
                 location.reload();
@@ -117,7 +117,7 @@ function modAlarmSend(param) {
             type: "POST",
             async: true,
             contentType: 'application/json',
-            url: "/alarm/delete/" + alarm_id.value,
+            url: "alarm/delete/" + alarm_id.value,
             data: JSON.stringify({name: send_data}),
             success: function () {
                 location.reload();

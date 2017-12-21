@@ -106,12 +106,12 @@ $(function () {
                 }
                 if (addList.length || updateList.length || deleteList.length) {
                     $.ajax({
-                        url: '/numbers_batch',
+                        url: 'numbers_batch',
                         //contentType: 'application/json',
                         data: //}
                             //json: JSON.stringify({
                                 JSON.stringify({
-                                //ik_num: '89519429049',
+
                                    updateList: updateList,
                                    addList: addList,
                                    deleteList: deleteList
@@ -182,7 +182,7 @@ $(function () {
                 dataType: "JSON",
                 location: "remote",
                 recIndx: 'id',
-                url: "/numbers_data",
+                url: "numbers_data",
                 getData: function (response) {
                     return { data: response.data };
                 }

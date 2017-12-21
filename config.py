@@ -13,7 +13,9 @@ CSRF_ENABLED = True
 # Используется для создания криптографического токена, который используется при валидации формы
 SECRET_KEY = 'mxP7U87p6htYeCgJNR9k'
 
+relative_dir = '/sgo'
 
+APPLICATION_ROOT = '/sgo'
 UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 

@@ -3,10 +3,10 @@
 
 
 
-<script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
-<script type="text/javascript" src="/static/js/jquery-ui/jquery-ui.js" ></script>
-<script type="text/javascript" src="/static/js/pqgrid.min.js"></script>
-<script type="text/javascript" src="/static/js/test-grid.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-ui/external/jquery/jquery.min.js') }}" ></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-ui/jquery-ui.min.js') }}" ></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/pqgrid.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/test-grid.js') }}"></script>
 <script type="text/javascript" >
 
     function ShowUpload() {
@@ -20,7 +20,7 @@
 </script>
 <input type="button" class="btn btn-primary btn-block btn-large" value="Загрузить файл" onclick="ShowUpload();"/>
 <div id="upload_div" title="Загрузить номера" style="display: none;">
-    <form name="upload_numbers" method="POST" action="/upload" enctype="multipart/form-data">
+    <form name="upload_numbers" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
 
         <input type="file" name="file"/>
         <input type="submit" class="btn btn-primary btn-block btn-large" value="Загрузить">

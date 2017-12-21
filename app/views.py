@@ -3,7 +3,7 @@ import os, io, shutil
 from datetime import timedelta
 from flask import render_template, flash, redirect, url_for, session, request, g, send_from_directory, jsonify
 from flask.ext.login import login_user, logout_user, current_user, login_required
-from app import app, db, lm
+from app import app, db, lm, relative_dir
 from .forms import LoginForm, AdminForm, CreateForm
 from .models import Users, Alarms, Lists, Numbers, Included_numbers
 from sqlalchemy import or_, update, delete
@@ -13,8 +13,10 @@ from .sms_config import Sms
 from werkzeug.utils import secure_filename
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 FlaskJSON(app)
-
+#
+app.config["APPLICATION_ROOT"] = "/sgo"
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
+#
 def allowed_file(filename):
     '''
     Функция проверки загруженного файла
@@ -23,7 +25,7 @@ def allowed_file(filename):
     '''
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
+#
 def get_numbers_data(user_id):
     '''
     Функция загрузки номеров пользователя
@@ -48,12 +50,12 @@ def get_numbers_data(user_id):
 # Обработчики ошибок:
 @app.errorhandler(404)
 def not_found_error(error):
-    return render_template('404.html'), 404
+    return render_template('404.html', relative=relative_dir), 404
 #
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    return render_template('500.html'), 500
+    return render_template('500.html', relative=relative_dir), 500
 
 @app.route('/')
 @app.route('/index', methods=['GET'])
@@ -65,16 +67,19 @@ def index():
     '''
 
     user = g.user
-
+    app.logger.info("Переход на главную '/' ")
     # Передать массив тревог на страницу:
     alarms = Alarms.query.filter(or_(Alarms.user==None, Alarms.user==user.id))
     lists = Lists.query.filter_by(user=user.id)
+
+    app.logger.info("Старт рендеринга страницы")
 
     return render_template('index.html',
                            title = 'Система голосового оповещения',
                            user = user,
                            alarms = alarms,
-                           lists = lists
+                           lists = lists,
+                           relative=relative_dir
                            )
 
 @app.route('/create/<string:action>', methods=['POST', 'GET'])
@@ -111,7 +116,7 @@ def create(action):
         return redirect(url_for('index'))
 
 
-    return render_template('create.html', form=form, action=action, title='Создать.. ', user=user)
+    return render_template('create.html', form=form, action=action, title='Создать.. ', user=user, relative=relative_dir)
 
 # Маршрут логина
 @app.route('/login', methods = ['GET', 'POST'])
@@ -139,6 +144,7 @@ def login():
     return render_template('login.html',
         title = 'Войти',
         form = form,
+        relative=relative_dir
     )
 
 @app.route('/logout')
@@ -176,7 +182,7 @@ def load_user(id):
 def numbers():
     user = g.user
 
-    return render_template('numbers.html', user = user)
+    return render_template('numbers.html', user = user, relative=relative_dir)
 
 
 @app.route('/admin', methods= ['GET', 'POST'])
@@ -197,11 +203,12 @@ def admin():
          me = Users(form.login.data, str(foo), form.organization.data, int(form.role.data))
          db.session.add(me)
          db.session.commit()
-         return redirect('/admin')
+         return redirect(relative_dir + '/admin')
 
     return render_template('admin.html',
                            form = form,
-                           user = user
+                           user = user,
+                           relative=relative_dir
                            )
 
 @app.route('/static/<path:path>')
@@ -281,7 +288,7 @@ def numbers_data():
     json_numbers = get_numbers_data(user.id)
 
     return jsonify(data=json_numbers)
-
+#
 # @app.route('/modify_list/<list_id>', methods=['POST', 'GET'])
 @app.route('/list/<action>/<list_id>', methods=['POST', 'GET'])
 @login_required
@@ -358,7 +365,8 @@ def modify_list(action, list_id):
                                     numbers=result_numbers,
                                     user_list=user_list,
                                     list_id=list_id,
-                                    user=user
+                                    user=user,
+                                    relative=relative_dir
 
                                     )
                     )
@@ -409,13 +417,13 @@ def alert_send(alert_id):
 @login_required
 def help():
     user = g.user
-    return render_template('help.html', user=user)
+    return render_template('help.html', user=user, relative=relative_dir)
 
 
 @app.route('/alarm/<action>/<id>', methods=['POST'])
 @login_required
 def alarm(action,id):
-
+#
     '''
     Функция операции над оповещением.
     :param action: принимает действие: modify или delete

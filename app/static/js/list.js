@@ -79,7 +79,7 @@ function save() {
         type: "POST",
         async: true,
         contentType: 'application/json',
-        url: "/list/modify/" + list_id.value,
+        url: "list/modify/" + list_id.value,
         data: JSON.stringify({
             list: send_arr,
             name: list_name.value,
@@ -93,8 +93,9 @@ function save() {
 
         },
         complete: function () {
-            //alert('OK')
-            location.replace("/index");
+            alert('Сохранено');
+            //location.replace("index");
+            //document.location.href = "/";
         }
     });
 }
@@ -105,7 +106,7 @@ function save() {
 
 function delete_list() {
     var id_list = document.getElementById('list_id');
-    var url_to_delete = '/list/delete/' + id_list.value;
+    var url_to_delete = 'list/delete/' + id_list.value;
     if (confirm("Удалить список?")) {
         location.replace(url_to_delete);
     } else {

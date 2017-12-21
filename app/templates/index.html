@@ -3,9 +3,9 @@
 
 
 
-<script type="text/javascript" src="/static/js/jquery-ui/external/jquery/jquery.js" ></script>
-<script type="text/javascript" src="/static/js/jquery-ui/jquery-ui.js" ></script>
-<script type="text/javascript" src="/static/js/send_alert.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-ui/external/jquery/jquery.min.js') }}" ></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-ui/jquery-ui.min.js') }}" ></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/send_alert.js') }}"></script>
 
 
 <div class="index">
@@ -49,7 +49,7 @@
                                     <input type="checkbox" id="list-{{list.id}}" name="list" value="{{ list.id }}">
                                     <label
                                             for="list-{{list.id}}">
-                                        <a class="list" href="/list/modify/{{list.id}}">{{ list.name }}</a>
+                                        <a class="list" href="{{ url_for('modify_list', action='modify', list_id=list.id) }}">{{ list.name }}</a>
                                             <!--<a href="/list/modify/{{list.id}}">&#128736;</a>
                                         /
                                             <a href="/list/delete/{{list.id}}">	&#128465;</a>-->
@@ -81,7 +81,7 @@
 </div>
 
 <div id="alarm_div" title="Изменить тревогу" style="display: none;">
-    <form name="modify_alarm" method="post" action="/alarm/modify">
+    <form name="modify_alarm" method="post" action="">
 
         <input type="text" id="alarm_name_change">
         <!--<label for="alarm_name_change">Текст тревоги</label>-->
