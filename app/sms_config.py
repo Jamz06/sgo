@@ -12,8 +12,8 @@ class Sms():
     gwhost = "http://kannel1.cocos.perm.ru"
     gwport = ":80"
     gwpath = "/cgi-bin/sendsms"
-    user = "user"
-    password= "ppaSsWoRdd"
+    user = "***"
+    password= "****"
 
     def send(self, text, number):
 
@@ -27,5 +27,5 @@ class Sms():
 
 if __name__ == '__main__':
     sms = Sms()
-    resp = sms.send('тестовое', '79519429049')
+    resp = sms.send('тестовое', '***')
     print(resp)
